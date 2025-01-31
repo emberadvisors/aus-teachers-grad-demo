@@ -14,11 +14,20 @@ library(janitor)
 # Suggested transformation steps ----
 # Read in data
 
+
+# Remove duplicate rows
+
+
 # Pivot non-tidy columns
 
-# Clean up column names
+
+# Clean up column names and values
+
 
 # Check for, and clean missing data
 
-# Save data as RDS to simplify future steps
 
+# Perform sense checks
+
+
+# Save data as RDS to simplify future steps
