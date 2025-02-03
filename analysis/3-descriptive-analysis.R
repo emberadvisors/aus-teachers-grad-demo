@@ -1,5 +1,7 @@
 # Some recommended libraries
 library(tidyverse)
+install.packages("ggplot2")
+library(ggplot2)
 
 # Some useful functions
 ?ggplot()      # Read in your transformed datasets
@@ -31,7 +33,7 @@ example %>%
 # Suggested modelling steps ----
 # Read in linked data from step 2
 
-# Explore different cuts of the data interactively
+# Explore different cuts of the data
 
 # Identify an interesting insight related to the problem
 
