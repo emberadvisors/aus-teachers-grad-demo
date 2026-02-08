@@ -60,10 +60,15 @@ prop_female_students_staff <- student_staff_data %>%
          , prop_female_staff = female_staff / all_staff) %>% 
   select(year, prop_female_students, prop_female_staff)
 
+
+
 # Identify an interesting insight related to the problem
 ## Create a new column which is the number of students per teacher in each jurisdiction
 ## Problem statement: Investigate the claim "NSW private schools are impacted less by the teacher shortage because they have been able
 ## to hire more teachers relative to students."
+
+# Example insight 1: Ratio of students to staff members in private schools by jurisdiction
+# Understand how the ratio varies across states, how does NSW compare (slightly tangential)
 
 # Find the number of students per staff member in private schools by jurisdiction over the past 5 years
 private_student_rate_by_jurisdiction <- student_staff_data %>% 
@@ -75,7 +80,7 @@ private_student_rate_by_jurisdiction <- student_staff_data %>%
   select(year, state_territory, student_rate)
 
 # Graph the insight
-student_rate_plot <- private_student_rate_by_jurisdiction %>% 
+student_rate_plot_1 <- private_student_rate_by_jurisdiction %>% 
   ggplot(aes(x = year, y = student_rate, colour = state_territory, group = state_territory)) +
   geom_line(size = 1) +
   geom_point(size = 2) +
@@ -83,5 +88,87 @@ student_rate_plot <- private_student_rate_by_jurisdiction %>%
        , x = "Calendar year"
        , y = "Students per staff member"
        , colour = "Jurisdiction") +
+  theme_minimal()
+
+# Example insight 2: Ratio of students to staff members across government, non-government schools
+# Understand if this media report/claim is true, are there more teachers relative to students in private schools?
+
+student_rate_by_school_type <- student_staff_data %>% 
+  filter(state_territory == 'NSW' & year >= 2015) %>% 
+  group_by(year, government_flag) %>% 
+  summarise(student_count = sum(student_count, na.rm = TRUE)
+            , staff_count = sum(staff_count, na.rm = TRUE)) %>% 
+  mutate(student_rate = student_count / staff_count) %>% 
+  select(year, government_flag, student_rate)
+
+student_rate_plot_2 <- student_rate_by_school_type %>% 
+  ggplot(aes(x = year, y = student_rate, colour = government_flag, group = government_flag)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  labs(title = "Number of students per staff member in NSW by school type, 2018 - 2023"
+       , x = "Calendar year"
+       , y = "Students per staff member"
+       , colour = "School type") +
+  theme_minimal()
+
+# Example insight 2: Ratio of students to staff members across catholic, non-catholic
+# Idea: Dis-aggregate the types of private schools to see if there is a particular school type driving this difference
+
+student_rate_by_catholic_type <- student_staff_data %>% 
+  filter(state_territory == 'NSW' & year >= 2015) %>% 
+  group_by(year, catholic_flag) %>% 
+  summarise(student_count = sum(student_count, na.rm = TRUE)
+            , staff_count = sum(staff_count, na.rm = TRUE)) %>% 
+  mutate(student_rate = student_count / staff_count) %>% 
+  select(year, catholic_flag, student_rate)
+
+student_rate_plot_3 <- student_rate_by_catholic_type %>% 
+  ggplot(aes(x = year, y = student_rate, colour = catholic_flag, group = catholic_flag)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  labs(title = "Number of students per staff member in NSW by catholic school type, 2018 - 2023"
+       , x = "Calendar year"
+       , y = "Students per staff member"
+       , colour = "Catholic type") +
+  theme_minimal()
+
+
+# Example insight 3:
+# Looking to see what is driving the change in rate, is it increase in students, decrease in staff, etc.
+
+student_staff_count <- student_staff_data %>% 
+  filter(state_territory == 'NSW' & year >= 2015) %>%
+  group_by(year, government_flag) %>% 
+  summarise(student_count = sum(student_count, na.rm = TRUE)
+            , staff_count = sum(staff_count, na.rm = TRUE)) %>% 
+  pivot_longer(
+    cols = c(student_count, staff_count),
+    names_pattern = "^(.*)_count$",
+    names_to = 'type',
+    values_to = 'count'
+  )
+
+# For example, just looking at staff count
+staff_count_plot_4 <- student_staff_count %>% 
+  filter(type == 'staff') %>% 
+  ggplot(aes(x = year, y = count, colour = government_flag, group = government_flag)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  labs(title = "Number of staff in NSW by school type, 2018 - 2023"
+       , x = "Calendar year"
+       , y = "Number of staff"
+       , colour = "Catholic type") +
+  theme_minimal()
+
+# For example, just looking at student count
+student_count_plot_4 <- student_staff_count %>% 
+  filter(type == 'student') %>% 
+  ggplot(aes(x = year, y = count, colour = government_flag, group = government_flag)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  labs(title = "Number of students in NSW by school type, 2018 - 2023"
+       , x = "Calendar year"
+       , y = "Number of students"
+       , colour = "Catholic type") +
   theme_minimal()
 
